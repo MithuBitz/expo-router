@@ -1,56 +1,173 @@
-# Welcome to your Expo app 👋
+<div align="center">
 
-This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
+# Expo Router Pro
 
-## Get started
+**A hands-on Expo Router playground for file-based routing, dynamic segments, and nested routes.**
 
-1. Install dependencies
+[![Expo SDK](https://img.shields.io/badge/Expo_SDK-55-000020?style=flat-square&logo=expo&logoColor=white)](https://docs.expo.dev/versions/v55.0.0/)
+[![Expo Router](https://img.shields.io/badge/Expo_Router-55-4630EB?style=flat-square)](https://docs.expo.dev/router/introduction/)
+[![React Native](https://img.shields.io/badge/React_Native-0.83-61DAFB?style=flat-square&logo=react&logoColor=black)](https://reactnative.dev/)
+[![TypeScript](https://img.shields.io/badge/TypeScript-5.9-3178C6?style=flat-square&logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
 
-   ```bash
-   npm install
-   ```
+[Getting started](#-getting-started) · [Routes](#-routes) · [Project structure](#-project-structure) · [Learn more](#-learn-more)
 
-2. Start the app
+</div>
 
-   ```bash
-   npx expo start
-   ```
+---
 
-In the output, you'll find options to open the app in a
+## Overview
 
-- [development build](https://docs.expo.dev/develop/development-builds/introduction/)
-- [Android emulator](https://docs.expo.dev/workflow/android-studio-emulator/)
-- [iOS simulator](https://docs.expo.dev/workflow/ios-simulator/)
-- [Expo Go](https://expo.dev/go), a limited sandbox for trying out app development with Expo
+**Expo Router Pro** is a small React Native app built to explore [Expo Router](https://docs.expo.dev/router/introduction/) patterns in a real project layout. Routes live under `src/app/` using file-based conventions—static screens, dynamic `[param]` segments, nested folders, and a catch-all `[...slug]` route for flexible paths.
 
-You can start developing by editing the files inside the **app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
+Use it as a reference when learning how URLs map to files, how `Link` navigation works, and how `useLocalSearchParams()` reads route parameters.
 
-## Get a fresh project
+## Features
 
-When you're ready, run:
+- **File-based routing** — Screens are defined by the filesystem under `src/app/`
+- **Stack navigation** — Root `Stack` layout from `expo-router`
+- **Dynamic routes** — `user/[userId]` and `username/[username]` with typed params
+- **Catch-all docs route** — `docs/[...slug]` handles arbitrary path depth (e.g. `/docs/react/introduction`)
+- **Typed routes** — Enabled via `experiments.typedRoutes` in `app.json`
+- **React Compiler** — Experimental compiler enabled in Expo config
+- **Cross-platform** — iOS, Android, and web (`expo start --web`)
+- **Path aliases** — `@/*` maps to `src/*` for clean imports
+
+## Tech stack
+
+| Layer | Choice |
+|-------|--------|
+| Framework | [Expo](https://expo.dev) SDK 55 |
+| Routing | [Expo Router](https://docs.expo.dev/router/introduction/) 55 |
+| UI | React Native 0.83 + React 19 |
+| Language | TypeScript (strict) |
+| Navigation | React Navigation 7 (via Expo Router) |
+
+> **Note:** This project targets [Expo SDK 55](https://docs.expo.dev/versions/v55.0.0/). Check the versioned docs before changing dependencies or APIs.
+
+## Getting started
+
+### Prerequisites
+
+- [Node.js](https://nodejs.org/) (LTS recommended)
+- [Bun](https://bun.sh/) or npm / yarn / pnpm
+- [Expo Go](https://expo.dev/go) on a device, or Android Studio / Xcode for simulators
+
+### Install
 
 ```bash
-npm run reset-project
+git clone <your-repo-url>
+cd expo-router-pro
+bun install   # or: npm install
 ```
 
-This command will move the starter code to the **app-example** directory and create a blank **app** directory where you can start developing.
+### Run
 
-### Other setup steps
+```bash
+bun start          # Expo dev server (choose platform in terminal)
+bun run android    # Open on Android
+bun run ios        # Open on iOS
+bun run web        # Open in browser
+bun run lint       # Run ESLint
+```
 
-- To set up ESLint for linting, run `npx expo lint`, or follow our guide on ["Using ESLint and Prettier"](https://docs.expo.dev/guides/using-eslint/)
-- If you'd like to set up unit testing, follow our guide on ["Unit Testing with Jest"](https://docs.expo.dev/develop/unit-testing/)
-- Learn more about the TypeScript setup in this template in our guide on ["Using TypeScript"](https://docs.expo.dev/guides/typescript/)
+Scan the QR code with Expo Go, or press `a` / `i` / `w` in the dev server for Android, iOS, or web.
+
+## Routes
+
+The home screen links to every route below for quick testing.
+
+| Path | File | Description |
+|------|------|-------------|
+| `/` | `src/app/index.tsx` | Home — links to all demo routes |
+| `/about` | `src/app/about.tsx` | Static screen |
+| `/profile` | `src/app/profile/index.tsx` | Nested index route |
+| `/profile/details` | `src/app/profile/details.tsx` | Nested static route |
+| `/user/:userId` | `src/app/user/[userId].tsx` | Dynamic segment — e.g. `/user/145` |
+| `/username/:username` | `src/app/username/[username].tsx` | Dynamic segment — e.g. `/username/mithu` |
+| `/docs/*` | `src/app/docs/[...slug].tsx` | Catch-all — e.g. `/docs/react`, `/docs/react/introduction` |
+
+### Route examples
+
+```tsx
+// Static
+<Link href="/about">About</Link>
+
+// Dynamic param
+<Link href="/user/145">User profile</Link>
+
+// Catch-all (slug becomes string | string[])
+<Link href="/docs/react/introduction">Docs</Link>
+```
+
+Reading params in a dynamic screen:
+
+```tsx
+import { useLocalSearchParams } from "expo-router";
+
+const { userId } = useLocalSearchParams();
+```
+
+## Project structure
+
+```
+expo-router-pro/
+├── assets/                 # Icons, splash, favicon
+├── src/
+│   ├── app/                # Expo Router routes (file-based)
+│   │   ├── _layout.tsx     # Root Stack layout
+│   │   ├── index.tsx       # /
+│   │   ├── about.tsx       # /about
+│   │   ├── profile/        # /profile, /profile/details
+│   │   ├── user/           # /user/[userId]
+│   │   ├── username/       # /username/[username]
+│   │   └── docs/           # /docs/[...slug]
+│   └── component/
+│       └── home.tsx        # Home links & copy
+├── app.json                # Expo config (scheme, experiments, web)
+├── package.json
+└── tsconfig.json           # @/* path alias → src/*
+```
+
+**Conventions**
+
+- Files in `src/app/` become routes; folders create URL segments.
+- `[param].tsx` — single dynamic segment.
+- `[...slug].tsx` — catch-all (rest of path).
+- `_layout.tsx` — layout wrapper for child routes.
+
+## Configuration highlights
+
+From `app.json`:
+
+- **Deep linking scheme:** `exporouterpro`
+- **Typed routes:** `experiments.typedRoutes: true`
+- **React Compiler:** `experiments.reactCompiler: true`
+- **Web:** static export enabled
 
 ## Learn more
 
-To learn more about developing your project with Expo, look at the following resources:
+| Resource | Link |
+|----------|------|
+| Expo Router docs | https://docs.expo.dev/router/introduction/ |
+| Expo SDK 55 | https://docs.expo.dev/versions/v55.0.0/ |
+| Dynamic routes | https://docs.expo.dev/router/reference/url-parameters/ |
+| Typed routes | https://docs.expo.dev/router/reference/typed-routes/ |
 
-- [Expo documentation](https://docs.expo.dev/): Learn fundamentals, or go into advanced topics with our [guides](https://docs.expo.dev/guides).
-- [Learn Expo tutorial](https://docs.expo.dev/tutorial/introduction/): Follow a step-by-step tutorial where you'll create a project that runs on Android, iOS, and the web.
+## Scripts
 
-## Join the community
+| Command | Action |
+|---------|--------|
+| `bun start` | Start Expo dev server |
+| `bun run android` | Run on Android |
+| `bun run ios` | Run on iOS |
+| `bun run web` | Run in browser |
+| `bun run lint` | Lint with Expo ESLint |
+| `bun run reset-project` | Reset to a clean starter (see `scripts/`) |
 
-Join our community of developers creating universal apps.
+---
 
-- [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
-- [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
+<div align="center">
+
+Built with [Expo](https://expo.dev) and [Expo Router](https://docs.expo.dev/router/introduction/)
+
+</div>
