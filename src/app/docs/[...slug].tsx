@@ -2,17 +2,20 @@ import { useLocalSearchParams } from "expo-router";
 import React from "react";
 import { StyleSheet, Text, View } from "react-native";
 
-const SubTopic = () => {
-  const { techname, subTopic } = useLocalSearchParams();
+const DocsDynamicRoute = () => {
+  const { slug } = useLocalSearchParams();
+
+  console.log(slug);
+
   return (
     <View>
       <Text>
-        SubTopic : {subTopic} {techname}
+        DocsDynamicRoute {Array.isArray(slug) ? slug.join("/") : slug}{" "}
       </Text>
     </View>
   );
 };
 
-export default SubTopic;
+export default DocsDynamicRoute;
 
 const styles = StyleSheet.create({});
