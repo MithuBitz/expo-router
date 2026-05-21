@@ -1,11 +1,10 @@
-import { Link } from "expo-router";
-import { StyleSheet, Text, View } from "react-native";
+import Home from "@/component/home";
+import { StyleSheet, View } from "react-native";
 
 export default function Index() {
   return (
     <View style={styles.container}>
-      <Text>Hello World</Text>
-      <Link href={"/about"}>About</Link>
+      <Home />
     </View>
   );
 }
