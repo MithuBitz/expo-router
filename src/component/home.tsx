@@ -8,6 +8,10 @@ const Home = () => {
       <Text>Edit src/app/index.tsx to edit this screen.</Text>
       <Link href="/about">About</Link>
       <Link href="/profile/details">Profile Details</Link>
+      <Link href="/user/145">UserId Page</Link>
+      <Link href="/username/mithu">Username Page</Link>
+      <Link href="/docs/react">React Docs</Link>
+      <Link href="/docs/react/introduction">React Docs Subtopics</Link>
     </View>
   );
 };
