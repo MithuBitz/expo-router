@@ -1,13 +1,12 @@
-import { useRouter } from "expo-router";
+import { Link } from "expo-router";
 import React from "react";
-import { Button, StyleSheet, Text, View } from "react-native";
+import { StyleSheet, Text, View } from "react-native";
 
 const LoginScreen = () => {
-  const router = useRouter();
   return (
     <View>
       <Text>LoginScreen</Text>
-      <Button title="Home" onPress={() => router.navigate("/")} />
+      <Link href={"/"}>Home</Link>
     </View>
   );
 };

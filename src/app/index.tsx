@@ -7,7 +7,6 @@ export default function Index() {
       <Text>Hello World</Text>
       <Link href={"/about"}>About</Link>
       <Link href={"/login"}>Login</Link>
-      <Link href={"/signup"}>Signup</Link>
     </View>
   );
 }
