@@ -1,23 +1,82 @@
-import { NativeTabs } from "expo-router/unstable-native-tabs";
+import Ionicons from "@expo/vector-icons/Ionicons";
+import { Tabs } from "expo-router";
+import { Text, TouchableOpacity, View } from "react-native";
+
+function MyTabBar({ state, descriptors, navigation }) {
+  return (
+    <View
+      style={{
+        flexDirection: "row",
+        padding: 10,
+      }}
+    >
+      {state.routes.map((route, index) => {
+        const isFocused = state.index === index;
+
+        const { options } = descriptors[route.key];
+
+        return (
+          <TouchableOpacity
+            key={route.key}
+            onPress={() => navigation.navigate(route.name)}
+            style={{
+              flex: 1,
+              alignItems: "center",
+            }}
+          >
+            <Text
+              style={{
+                color: isFocused ? "blue" : "grey",
+              }}
+            >
+              {options.title}
+            </Text>
+          </TouchableOpacity>
+        );
+      })}
+    </View>
+  );
+}
 
 export default function TabLayout() {
   return (
-    <NativeTabs tintColor={"tomato"} backgroundColor={"#210749"}>
-      <NativeTabs.Trigger name="index">
-        <NativeTabs.Trigger.Label>Home</NativeTabs.Trigger.Label>
-        <NativeTabs.Trigger.Icon sf="house.fill" md="home" />
-      </NativeTabs.Trigger>
-
-      <NativeTabs.Trigger name="settings">
-        <NativeTabs.Trigger.Icon sf="gear" md="settings" />
-        <NativeTabs.Trigger.Label>Settings</NativeTabs.Trigger.Label>
-      </NativeTabs.Trigger>
-
-      <NativeTabs.Trigger name="explore">
-        <NativeTabs.Trigger.Label>Explore</NativeTabs.Trigger.Label>
-        <NativeTabs.Trigger.Icon sf="compass.drawing" md="compare_arrows" />
-        <NativeTabs.Trigger.Badge>9+</NativeTabs.Trigger.Badge>
-      </NativeTabs.Trigger>
-    </NativeTabs>
+    <Tabs tabBar={(props) => <MyTabBar {...props} />}>
+      <Tabs.Screen
+        name="index"
+        options={{
+          title: "Home",
+          tabBarIcon: ({ color }) => (
+            <Ionicons name="home" size={24} color={color} />
+          ),
+        }}
+      />
+      <Tabs.Screen
+        name="explore"
+        options={{
+          title: "Explore",
+          tabBarIcon: ({ color }) => (
+            <Ionicons name="compass" size={24} color={color} />
+          ),
+        }}
+      />
+      <Tabs.Screen
+        name="about"
+        options={{
+          title: "About",
+          tabBarIcon: ({ color }) => (
+            <Ionicons name="binoculars-sharp" size={24} color={color} />
+          ),
+        }}
+      />
+      <Tabs.Screen
+        name="settings"
+        options={{
+          title: "Settings",
+          tabBarIcon: ({ color }) => (
+            <Ionicons name="settings" size={24} color={color} />
+          ),
+        }}
+      />
+    </Tabs>
   );
 }
