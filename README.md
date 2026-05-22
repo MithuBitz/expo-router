@@ -2,14 +2,14 @@
 
 # Expo Router Pro
 
-**A hands-on Expo Router playground for file-based routing, dynamic segments, and nested routes.**
+**A hands-on Expo Router playground for route groups, protected stacks, drawer navigation, and custom tab bars.**
 
 [![Expo SDK](https://img.shields.io/badge/Expo_SDK-55-000020?style=flat-square&logo=expo&logoColor=white)](https://docs.expo.dev/versions/v55.0.0/)
 [![Expo Router](https://img.shields.io/badge/Expo_Router-55-4630EB?style=flat-square)](https://docs.expo.dev/router/introduction/)
 [![React Native](https://img.shields.io/badge/React_Native-0.83-61DAFB?style=flat-square&logo=react&logoColor=black)](https://reactnative.dev/)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.9-3178C6?style=flat-square&logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
 
-[Getting started](#-getting-started) · [Routes](#-routes) · [Project structure](#-project-structure) · [Learn more](#-learn-more)
+[Getting started](#-getting-started) · [Navigation](#-navigation) · [Routes](#-routes) · [Project structure](#-project-structure) · [Learn more](#-learn-more)
 
 </div>
 
@@ -17,20 +17,23 @@
 
 ## Overview
 
-**Expo Router Pro** is a small React Native app built to explore [Expo Router](https://docs.expo.dev/router/introduction/) patterns in a real project layout. Routes live under `src/app/` using file-based conventions—static screens, dynamic `[param]` segments, nested folders, and a catch-all `[...slug]` route for flexible paths.
+**Expo Router Pro** is a small React Native app for exploring [Expo Router](https://docs.expo.dev/router/introduction/) in a realistic app shell. Routes live under `src/app/` using file-based conventions, organized into **route groups** `(auth)`, `(drawer)`, and `(tabs)` that do not appear in the URL.
 
-Use it as a reference when learning how URLs map to files, how `Link` navigation works, and how `useLocalSearchParams()` reads route parameters.
+The root layout uses **`Stack.Protected`** to switch between an auth flow and the main app. The active main navigator is a **drawer** with a custom sidebar (brand header, themed items, footer sign-in link). A **tabs** layout with a custom floating tab bar (including optional **liquid glass** via `expo-glass-effect`) is included as an alternate pattern you can enable from the root layout.
+
+Use this repo to see how nested layouts compose, how auth gating works at the stack level, and how to customize React Navigation drawer and tab UI inside Expo Router.
 
 ## Features
 
-- **File-based routing** — Screens are defined by the filesystem under `src/app/`
-- **Stack navigation** — Root `Stack` layout from `expo-router`
-- **Dynamic routes** — `user/[userId]` and `username/[username]` with typed params
-- **Catch-all docs route** — `docs/[...slug]` handles arbitrary path depth (e.g. `/docs/react/introduction`)
-- **Typed routes** — Enabled via `experiments.typedRoutes` in `app.json`
+- **Route groups** — `(auth)`, `(drawer)`, and `(tabs)` organize files without changing URLs
+- **Protected routes** — `Stack.Protected` in the root layout toggles auth vs. main app (`isLoggedIn` flag)
+- **Drawer navigation** — Custom `drawerContent`, light/dark palette, Ionicons, safe-area footer
+- **Custom tab bar** — Optional `(tabs)` group with `tabBar` render prop and `GlassView` when available
+- **Auth stack** — Login and register screens under `(auth)`
+- **Typed routes** — `experiments.typedRoutes` in `app.json`
 - **React Compiler** — Experimental compiler enabled in Expo config
 - **Cross-platform** — iOS, Android, and web (`expo start --web`)
-- **Path aliases** — `@/*` maps to `src/*` for clean imports
+- **Path aliases** — `@/*` → `src/*`, `@/assets/*` → `assets/*`
 
 ## Tech stack
 
@@ -40,7 +43,8 @@ Use it as a reference when learning how URLs map to files, how `Link` navigation
 | Routing | [Expo Router](https://docs.expo.dev/router/introduction/) 55 |
 | UI | React Native 0.83 + React 19 |
 | Language | TypeScript (strict) |
-| Navigation | React Navigation 7 (via Expo Router) |
+| Navigation | React Navigation 7 — Stack, Drawer, Bottom Tabs (via Expo Router) |
+| Extras | `expo-glass-effect`, `react-native-reanimated`, `react-native-gesture-handler` |
 
 > **Note:** This project targets [Expo SDK 55](https://docs.expo.dev/versions/v55.0.0/). Check the versioned docs before changing dependencies or APIs.
 
@@ -72,86 +76,132 @@ bun run lint       # Run ESLint
 
 Scan the QR code with Expo Go, or press `a` / `i` / `w` in the dev server for Android, iOS, or web.
 
+## Navigation
+
+### Root stack and auth gating
+
+`src/app/_layout.tsx` defines a root `Stack` with two protected branches:
+
+| `isLoggedIn` | Visible group | Purpose |
+|--------------|---------------|---------|
+| `false` | `(auth)` | Login / register |
+| `true` | `(drawer)` | Main app (default) |
+
+Change `isLoggedIn` in the root layout to preview the auth flow vs. the drawer app.
+
+```tsx
+// src/app/_layout.tsx
+const isLoggedIn = true; // set false to show (auth) screens
+```
+
+### Drawer (active main navigator)
+
+`(drawer)/_layout.tsx` uses `expo-router/drawer` with a **custom drawer**: branded header, `DrawerItemList`, themed active/inactive states, and a footer link to `/login`. Screens: **Home**, **Explore**, **Settings**.
+
+### Tabs (alternate, commented out)
+
+To use bottom tabs instead of the drawer, in `src/app/_layout.tsx`:
+
+1. Comment out the `(drawer)` `Stack.Screen`
+2. Uncomment the `(tabs)` `Stack.Screen`
+
+`(tabs)/_layout.tsx` implements a **custom tab bar** (`tabBar` prop) with a pill-style bar and optional **liquid glass** when `isLiquidGlassAvailable()` is true. Add matching screen files under `(tabs)/` for any routes referenced in that layout (currently `about.tsx` is present; extend with `index`, `explore`, `settings` as needed).
+
+### Route groups and URLs
+
+Folders wrapped in parentheses—e.g. `(drawer)`—are **route groups**. They organize layouts and files but **do not** add a URL segment. `(drawer)/index.tsx` maps to `/`, not `/drawer`.
+
 ## Routes
 
-The home screen links to every route below for quick testing.
+With `isLoggedIn = true` (default), the drawer group is mounted:
 
 | Path | File | Description |
 |------|------|-------------|
-| `/` | `src/app/index.tsx` | Home — links to all demo routes |
-| `/about` | `src/app/about.tsx` | Static screen |
-| `/profile` | `src/app/profile/index.tsx` | Nested index route |
-| `/profile/details` | `src/app/profile/details.tsx` | Nested static route |
-| `/user/:userId` | `src/app/user/[userId].tsx` | Dynamic segment — e.g. `/user/145` |
-| `/username/:username` | `src/app/username/[username].tsx` | Dynamic segment — e.g. `/username/mithu` |
-| `/docs/*` | `src/app/docs/[...slug].tsx` | Catch-all — e.g. `/docs/react`, `/docs/react/introduction` |
+| `/` | `src/app/(drawer)/index.tsx` | Home |
+| `/explore` | `src/app/(drawer)/explore.tsx` | Explore |
+| `/settings` | `src/app/(drawer)/settings.tsx` | Settings |
 
-### Route examples
+Auth screens (visible when `isLoggedIn = false`):
 
-```tsx
-// Static
-<Link href="/about">About</Link>
+| Path | File | Description |
+|------|------|-------------|
+| `/login` | `src/app/(auth)/login.tsx` | Login |
+| `/register` | `src/app/(auth)/register.tsx` | Register |
 
-// Dynamic param
-<Link href="/user/145">User profile</Link>
+Tabs group (enable `(tabs)` in root layout to use):
 
-// Catch-all (slug becomes string | string[])
-<Link href="/docs/react/introduction">Docs</Link>
-```
+| Path | File | Description |
+|------|------|-------------|
+| `/about` | `src/app/(tabs)/about.tsx` | About (sample tab screen) |
 
-Reading params in a dynamic screen:
+### Link examples
 
 ```tsx
-import { useLocalSearchParams } from "expo-router";
+import { Link } from "expo-router";
 
-const { userId } = useLocalSearchParams();
+// Drawer screens (main app)
+<Link href="/">Home</Link>
+<Link href="/explore">Explore</Link>
+<Link href="/settings">Settings</Link>
+
+// Auth
+<Link href="/login">Login</Link>
+<Link href="/register">Register</Link>
 ```
 
 ## Project structure
 
 ```
 expo-router-pro/
-├── assets/                 # Icons, splash, favicon
+├── assets/
+│   ├── expo.icon/              # iOS app icon asset
+│   └── images/                 # App icon, splash, favicon, Android adaptive icons
 ├── src/
-│   ├── app/                # Expo Router routes (file-based)
-│   │   ├── _layout.tsx     # Root Stack layout
-│   │   ├── index.tsx       # /
-│   │   ├── about.tsx       # /about
-│   │   ├── profile/        # /profile, /profile/details
-│   │   ├── user/           # /user/[userId]
-│   │   ├── username/       # /username/[username]
-│   │   └── docs/           # /docs/[...slug]
+│   ├── app/                    # Expo Router routes (file-based)
+│   │   ├── _layout.tsx         # Root Stack + Stack.Protected auth gating
+│   │   ├── (auth)/             # Auth route group (not in URL)
+│   │   │   ├── _layout.tsx     # Auth Stack
+│   │   │   ├── login.tsx       # /login
+│   │   │   └── register.tsx    # /register
+│   │   ├── (drawer)/           # Main app — drawer (active by default)
+│   │   │   ├── _layout.tsx     # Drawer + custom drawerContent
+│   │   │   ├── index.tsx       # /
+│   │   │   ├── explore.tsx     # /explore
+│   │   │   └── settings.tsx    # /settings
+│   │   └── (tabs)/             # Alternate — bottom tabs (optional)
+│   │       ├── _layout.tsx     # Tabs + custom tabBar (glass effect)
+│   │       └── about.tsx       # /about
 │   └── component/
-│       └── home.tsx        # Home links & copy
-├── app.json                # Expo config (scheme, experiments, web)
+│       └── home.tsx            # Legacy starter component (unused by routes)
+├── .vscode/                    # Editor settings & recommended extensions
+├── app.json                    # Expo config (scheme, experiments, web, splash)
 ├── package.json
-└── tsconfig.json           # @/* path alias → src/*
+├── tsconfig.json               # Path aliases: @/*, @/assets/*
+├── AGENTS.md                   # Agent note: use Expo SDK 55 docs
+└── bun.lock
 ```
 
-**Conventions**
+### Conventions
 
-- Files in `src/app/` become routes; folders create URL segments.
-- `[param].tsx` — single dynamic segment.
-- `[...slug].tsx` — catch-all (rest of path).
-- `_layout.tsx` — layout wrapper for child routes.
+| Pattern | Meaning |
+|---------|---------|
+| `(group)/` | Route group — layout wrapper, omitted from URL |
+| `_layout.tsx` | Layout for child routes (Stack, Drawer, Tabs) |
+| `index.tsx` | Index route for that segment (`/`) |
+| `[param].tsx` | Dynamic segment (not used in current routes) |
+| `[...slug].tsx` | Catch-all segment (not used in current routes) |
 
 ## Configuration highlights
 
 From `app.json`:
 
-- **Deep linking scheme:** `exporouterpro`
-- **Typed routes:** `experiments.typedRoutes: true`
-- **React Compiler:** `experiments.reactCompiler: true`
-- **Web:** static export enabled
-
-## Learn more
-
-| Resource | Link |
-|----------|------|
-| Expo Router docs | https://docs.expo.dev/router/introduction/ |
-| Expo SDK 55 | https://docs.expo.dev/versions/v55.0.0/ |
-| Dynamic routes | https://docs.expo.dev/router/reference/url-parameters/ |
-| Typed routes | https://docs.expo.dev/router/reference/typed-routes/ |
+| Setting | Value |
+|---------|--------|
+| Deep linking scheme | `exporouterpro` |
+| Typed routes | `experiments.typedRoutes: true` |
+| React Compiler | `experiments.reactCompiler: true` |
+| Web output | `static` |
+| UI style | `automatic` (follows system light/dark) |
 
 ## Scripts
 
@@ -162,7 +212,19 @@ From `app.json`:
 | `bun run ios` | Run on iOS |
 | `bun run web` | Run in browser |
 | `bun run lint` | Lint with Expo ESLint |
-| `bun run reset-project` | Reset to a clean starter (see `scripts/`) |
+| `bun run reset-project` | Reset helper (see `package.json`; requires `scripts/reset-project.js`) |
+
+## Learn more
+
+| Resource | Link |
+|----------|------|
+| Expo Router | https://docs.expo.dev/router/introduction/ |
+| Expo SDK 55 | https://docs.expo.dev/versions/v55.0.0/ |
+| Route groups | https://docs.expo.dev/router/reference/route-groups/ |
+| Protected routes | https://docs.expo.dev/router/reference/protected-routes/ |
+| Drawer navigator | https://docs.expo.dev/router/advanced/drawer/ |
+| Tabs navigator | https://docs.expo.dev/router/advanced/tabs/ |
+| Typed routes | https://docs.expo.dev/router/reference/typed-routes/ |
 
 ---
 
