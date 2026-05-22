@@ -40,6 +40,7 @@ function MyTabBar({
   navigation,
   insets,
 }: BottomTabBarProps) {
+  
   const scheme = useColorScheme() === "dark" ? "dark" : "light";
   const colors = palette[scheme];
   const useGlass = isLiquidGlassAvailable();
